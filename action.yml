@@ -1,0 +1,25 @@
+name: 'Upload Python Package to Artifactory'
+description: 'GitHub Composite Action to upload Python Package to Artifactory'
+inputs:
+  repository-name:
+    description: 'Artifactory Virtual Repository name to upload package'
+    required: true
+  artifactory-user:
+    description: 'Artifactory User'
+    required: true
+  artifactory-psw:
+    description: 'Artifactory Password'
+    required: true
+  artifactory-host:
+    description: 'Artifactory Host'
+    required: true    
+runs:
+  using: "composite"
+  steps:     
+  - id: build-and-publish
+    run: |      
+      python -m pip install pip==20.2.4
+      pip install "setuptools>=56,<57" wheel "twine>=3,<4"
+      python setup.py sdist bdist_wheel
+      twine upload --repository-url ${{ inputs.artifactory-host }}/artifactory/api/pypi/${{ inputs.repository-name }} -u ${{ inputs.artifactory-user }} -p ${{ inputs.artifactory-psw }} --non-interactive dist/* --verbose
+    shell: bash
